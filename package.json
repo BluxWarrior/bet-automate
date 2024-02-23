@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "nexe": "^4.0.0-rc.4",
+    "puppeteer": "^22.1.0"
+  }
+}
