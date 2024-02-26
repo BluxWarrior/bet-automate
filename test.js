@@ -15,7 +15,10 @@ async function reb_login(page, email, password) {
   await page.type('input[id="inputPassword"]', password);
 
   await sleep(3000);
-  await page.click('button[type="submit"]');
+  while (await page.url().includes("login")) {
+    await page.click('button[type="submit"]');
+    await sleep(3000);
+  }
 }
 
 async function bet_login(page, email, password) {
@@ -85,6 +88,12 @@ async function bet(reb_page, bet_page, ID) {
   //     'a[id="BetOnBookmaker"]',
   //     (div) => div.href
   //   );
+
+  // get stock value
+  const inputElementHandle = await reb_page.$("#Stake");
+  const inputValue = await inputElementHandle.evaluate((el) => el.value);
+
+  // get card link
   const elementHandles = await reb_page.$$('a[id="BetOnBookmaker"]');
   const card_link = await Promise.all(
     elementHandles.map(async (element) => {
@@ -110,15 +119,35 @@ async function bet(reb_page, bet_page, ID) {
   }
 
   if (await bet_page.$('input[class="stake"]')) {
-    await bet_page.type('input[class="stake"]', "0.1");
+    // option 1: Popup
+    // input bet value
+    await sleep(500);
+    await bet_page.type('input[class="stake"]', inputValue);
 
     await bet_page.waitForSelector(
-      'button[class="place-bets-button ui-betslip-action"]'
+      'button[class*="place-bets-button ui-betslip-action"]'
     );
-    await sleep(500);
-    await bet_page.click('button[class="place-bets-button ui-betslip-action"]');
+    await sleep(1000);
+
+    // click bet button
+    await bet_page.click(
+      'button[class*="place-bets-button ui-betslip-action"]'
+    );
+
+    // if max value
+    await sleep(3000);
+    if (await bet_page.$('a[class="set-max-stake"]')) {
+      await bet_page.click('a[class="set-max-stake"]');
+    }
+    await sleep(1000);
+    await bet_page.click(
+      'button[class*="place-bets-button ui-betslip-action"]'
+    );
   } else if (await bet_page.$('input[aria-label="Stake"]')) {
-    await bet_page.type('input[aria-label="Stake"]', "0.1");
+    await sleep(1000);
+    // option 2: sidebar
+    // input bet value
+    await bet_page.type('input[aria-label="Stake"]', inputValue);
 
     await bet_page.waitForSelector(
       'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
@@ -127,7 +156,20 @@ async function bet(reb_page, bet_page, ID) {
     await bet_page.click(
       'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
     );
+
+    // if max value
+    await sleep(1000);
+    if (
+      await bet_page.$('button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]')
+    ) {
+      await bet_page.click(
+        'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
+      );
+      await sleep(1000);
+    }
   } else return false;
+
+  await sleep(500);
 
   await reb_page.bringToFront();
   await sleep(100);
