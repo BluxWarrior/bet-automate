@@ -136,6 +136,7 @@ async function bet(reb_page, bet_page, ID) {
     await bet_page.keyboard.press("A");
     await bet_page.keyboard.up("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("Backspace");
+    await sleep(500);
     await bet_page.type('input[class="stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
@@ -192,6 +193,7 @@ async function bet(reb_page, bet_page, ID) {
     await bet_page.keyboard.press("A");
     await bet_page.keyboard.up("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("Backspace");
+    await sleep(500);
     await bet_page.type('input[aria-label="Stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
