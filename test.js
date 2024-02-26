@@ -130,13 +130,13 @@ async function bet(reb_page, bet_page, ID) {
   if (await bet_page.$('input[class="stake"]')) {
     // option 1: Popup
     // input bet value
-    await sleep(500);
+    await sleep(2000);
     await bet_page.focus('input[class="stake"]');
     await bet_page.keyboard.down("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("A");
     await bet_page.keyboard.up("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("Backspace");
-    await sleep(500);
+    await sleep(1000);
     await bet_page.type('input[class="stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
@@ -185,7 +185,7 @@ async function bet(reb_page, bet_page, ID) {
       }
     }
   } else if (await bet_page.$('input[aria-label="Stake"]')) {
-    await sleep(1000);
+    await sleep(2000);
     // option 2: sidebar
     // input bet value
     await bet_page.focus('input[aria-label="Stake"]');
@@ -193,7 +193,7 @@ async function bet(reb_page, bet_page, ID) {
     await bet_page.keyboard.press("A");
     await bet_page.keyboard.up("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("Backspace");
-    await sleep(500);
+    await sleep(1000);
     await bet_page.type('input[aria-label="Stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
