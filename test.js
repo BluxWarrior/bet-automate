@@ -90,8 +90,17 @@ async function bet(reb_page, bet_page, ID) {
   //   );
 
   // get stock value
-  const inputElementHandle = await reb_page.$("#Stake");
-  const inputValue = await inputElementHandle.evaluate((el) => el.value);
+  let inputElementHandles = await reb_page.$$('input[id="Stake"]');
+  let inputValue = await Promise.all(
+    inputElementHandles.map(async (element) => {
+      // Get the property 'id' for each element
+      const idProperty = await element.getProperty("value");
+      // Convert the property JSHandle to a string value
+      const idValue = await idProperty.jsonValue();
+      return idValue;
+    })
+  );
+  //   inputValue = ["0.1"];
 
   // get card link
   const elementHandles = await reb_page.$$('a[id="BetOnBookmaker"]');
@@ -122,7 +131,7 @@ async function bet(reb_page, bet_page, ID) {
     // option 1: Popup
     // input bet value
     await sleep(500);
-    await bet_page.type('input[class="stake"]', inputValue);
+    await bet_page.type('input[class="stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
       'button[class*="place-bets-button ui-betslip-action"]'
@@ -137,17 +146,32 @@ async function bet(reb_page, bet_page, ID) {
     // if max value
     await sleep(3000);
     if (await bet_page.$('a[class="set-max-stake"]')) {
+      // set max value
       await bet_page.click('a[class="set-max-stake"]');
+
+      // get max value
+      inputElementHandles = await bet_page.$$('input[class="Stake"]');
+      inputValue = await Promise.all(
+        inputElementHandles.map(async (element) => {
+          // Get the property 'id' for each element
+          const idProperty = await element.getProperty("data-last-saved-value");
+          // Convert the property JSHandle to a string value
+          const idValue = await idProperty.jsonValue();
+          return idValue;
+        })
+      );
+
+      // press bet button
+      await sleep(1000);
+      await bet_page.click(
+        'button[class*="place-bets-button ui-betslip-action"]'
+      );
     }
-    await sleep(1000);
-    await bet_page.click(
-      'button[class*="place-bets-button ui-betslip-action"]'
-    );
   } else if (await bet_page.$('input[aria-label="Stake"]')) {
     await sleep(1000);
     // option 2: sidebar
     // input bet value
-    await bet_page.type('input[aria-label="Stake"]', inputValue);
+    await bet_page.type('input[aria-label="Stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
       'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
@@ -162,6 +186,20 @@ async function bet(reb_page, bet_page, ID) {
     if (
       await bet_page.$('button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]')
     ) {
+      // get max value
+      // get max value
+      inputElementHandles = await bet_page.$$('input[aria-label="Stake"]');
+      inputValue = await Promise.all(
+        inputElementHandles.map(async (element) => {
+          // Get the property 'id' for each element
+          const idProperty = await element.getProperty("value");
+          // Convert the property JSHandle to a string value
+          const idValue = await idProperty.jsonValue();
+          return idValue;
+        })
+      );
+
+      // press bet
       await bet_page.click(
         'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
       );
@@ -174,6 +212,15 @@ async function bet(reb_page, bet_page, ID) {
   await reb_page.bringToFront();
   await sleep(100);
   // log
+  console.log("inputvalue     ", inputValue);
+  await reb_page.focus('input[id="Stake"]');
+  await reb_page.keyboard.down("Control"); // Use 'Command' on macOS
+  await reb_page.keyboard.press("A");
+  await reb_page.keyboard.up("Control"); // Use 'Command' on macOS
+  await reb_page.keyboard.press("Backspace");
+  await reb_page.type('input[id="Stake"]', inputValue[0]);
+  await sleep(1000);
+
   await reb_page.click('button[id="LogBet"]');
   await sleep(5000);
   return true;
