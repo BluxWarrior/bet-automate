@@ -157,26 +157,25 @@ async function bet(reb_page, bet_page, ID) {
 
       await sleep(1000);
       // get max value
-      inputElementHandles = await bet_page.$$('input[class="Stake"]');
+      inputElementHandles = await bet_page.$$('input[class="stake"]');
       inputValue = await Promise.all(
         inputElementHandles.map(async (element) => {
           // Get the property 'id' for each element
-          const idProperty = await element.getProperty("data-last-saved-value");
+          const idProperty = await element.getProperty("value");
           // Convert the property JSHandle to a string value
           const idValue = await idProperty.jsonValue();
           return idValue;
         })
       );
-
       // press bet button
       await sleep(1000);
       await bet_page.click(
         'button[class*="place-bets-button ui-betslip-action"]'
       );
-      await sleep(3000);
+      await sleep(5000);
 
       // if balance is not enough
-      if (await bet_page.$('input[class="stake"]')) {
+      if (!(await bet_page.$('div[class="confirmed-bets-message"]'))) {
         await reb_page.bringToFront();
         await reb_page.click('button[id="CloseSelectedCard"]');
         await sleep(1000);
@@ -225,7 +224,7 @@ async function bet(reb_page, bet_page, ID) {
       await bet_page.click(
         'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
       );
-      await sleep(3000);
+      await sleep(5000);
       // if balance is not enough
       if (await bet_page.$('input[aria-label="Stake"]')) {
         await reb_page.bringToFront();
