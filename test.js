@@ -179,7 +179,7 @@ async function bet(reb_page, bet_page, ID) {
       // if balance is not enough
       if (!(await bet_page.$('div[class="confirmed-bets-message"]'))) {
         await reb_page.bringToFront();
-        await reb_page.click('button[id="CloseSelectedCard"]');
+        await reb_page.click('button[id="RemoveBet"]');
         await sleep(1000);
         return true;
       }
@@ -218,7 +218,7 @@ async function bet(reb_page, bet_page, ID) {
       // if balance is not enough
       if (await bet_page.$('input[aria-label="Stake"]')) {
         await reb_page.bringToFront();
-        await reb_page.click('button[id="CloseSelectedCard"]');
+        await reb_page.click('button[id="RemoveBet"]');
         await sleep(1000);
         return true;
       }
@@ -256,6 +256,16 @@ async function bet(reb_page, bet_page, ID) {
   return true;
 }
 
+async function remove(reb_page, ID) {
+  await reb_page.bringToFront();
+  await reb_page.click(`div[id=${ID}]`);
+
+  await reb_page.waitForSelector('button[id="RemoveBet"]');
+  await sleep(1000);
+  await reb_page.click('button[id="RemoveBet"]');
+  await sleep(1000);
+}
+
 (async () => {
   const browser = await puppeteer.launch({ headless: false });
 
@@ -279,7 +289,11 @@ async function bet(reb_page, bet_page, ID) {
           if (!origin_betIDs.includes(bid)) {
             origin_betIDs.push(bid);
             console.log(origin_betIDs);
-            while (!(await bet(reb_page, bet_page, bid)));
+            let count = 0;
+            while (!(await bet(reb_page, bet_page, bid)) && count < 10) count++;
+          } else {
+            console.log("remove", bid);
+            await remove(reb_page, bid);
           }
         }
       }
