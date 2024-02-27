@@ -155,6 +155,7 @@ async function bet(reb_page, bet_page, ID) {
       // set max value
       await bet_page.click('a[class="set-max-stake"]');
 
+      await sleep(1000);
       // get max value
       inputElementHandles = await bet_page.$$('input[class="Stake"]');
       inputValue = await Promise.all(
@@ -172,12 +173,10 @@ async function bet(reb_page, bet_page, ID) {
       await bet_page.click(
         'button[class*="place-bets-button ui-betslip-action"]'
       );
-      await sleep(1000);
+      await sleep(3000);
 
       // if balance is not enough
-      if (
-        await bet_page.$('button[class*="place-bets-button ui-betslip-action"]')
-      ) {
+      if (await bet_page.$('input[class="stake"]')) {
         await reb_page.bringToFront();
         await reb_page.click('button[id="CloseSelectedCard"]');
         await sleep(1000);
@@ -226,11 +225,9 @@ async function bet(reb_page, bet_page, ID) {
       await bet_page.click(
         'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
       );
-      await sleep(1000);
+      await sleep(3000);
       // if balance is not enough
-      if (
-        await bet_page.$('button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]')
-      ) {
+      if (await bet_page.$('input[aria-label="Stake"]')) {
         await reb_page.bringToFront();
         await reb_page.click('button[id="CloseSelectedCard"]');
         await sleep(1000);
@@ -250,6 +247,7 @@ async function bet(reb_page, bet_page, ID) {
   await reb_page.keyboard.press("A");
   await reb_page.keyboard.up("Control"); // Use 'Command' on macOS
   await reb_page.keyboard.press("Backspace");
+  await sleep(1000);
   await reb_page.type('input[id="Stake"]', inputValue[0]);
   await sleep(1000);
 
