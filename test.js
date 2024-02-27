@@ -209,24 +209,12 @@ async function bet(reb_page, bet_page, ID) {
     if (
       await bet_page.$('button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]')
     ) {
-      // get max value
-      // get max value
-      inputElementHandles = await bet_page.$$('input[aria-label="Stake"]');
-      inputValue = await Promise.all(
-        inputElementHandles.map(async (element) => {
-          // Get the property 'id' for each element
-          const idProperty = await element.getProperty("value");
-          // Convert the property JSHandle to a string value
-          const idValue = await idProperty.jsonValue();
-          return idValue;
-        })
-      );
-
       // press bet
       await bet_page.click(
         'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
       );
       await sleep(5000);
+
       // if balance is not enough
       if (await bet_page.$('input[aria-label="Stake"]')) {
         await reb_page.bringToFront();
@@ -235,6 +223,17 @@ async function bet(reb_page, bet_page, ID) {
         return true;
       }
     }
+
+    // get max value
+    inputElementHandles = await bet_page.$$(
+      'span[class="typography-h320 _3-5dV"]'
+    );
+    inputValue = await inputElementHandles[0].evaluate(
+      (element) => element.textContent
+    );
+    await sleep(1000);
+    inputValue = [inputValue.replace("£", "")];
+    console.log("max value", inputValue);
   } else return false;
 
   await sleep(500);
