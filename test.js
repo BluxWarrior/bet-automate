@@ -6,7 +6,9 @@ function sleep(ms) {
 async function reb_login(page, email, password) {
   await page.bringToFront();
   // login to rebelbetting
-  await page.goto("https://vb.rebelbetting.com/login");
+  await page.goto("https://vb.rebelbetting.com/login", {
+    waitUntil: "networkidle0",
+  });
 
   await page.waitForSelector('input[id="inputEmail"]');
   await sleep(500);
@@ -23,7 +25,7 @@ async function reb_login(page, email, password) {
 
 async function bet_login(page, email, password) {
   await page.bringToFront();
-  await page.goto("https://www.betfair.com/");
+  await page.goto("https://www.betfair.com/", { waitUntil: "networkidle0" });
   await sleep(3000);
 
   // press cookie button
@@ -118,8 +120,8 @@ async function bet(reb_page, bet_page, ID) {
   // go to bet
   console.log(card_link[0]);
   await bet_page.bringToFront();
-  await bet_page.goto(card_link[0]);
-  await sleep(1000);
+  await bet_page.goto(card_link[0], { waitUntil: "networkidle0" });
+  await sleep(3000);
 
   // if not betfair
   if (!bet_page.url().includes("www.betfair.com")) {
@@ -142,7 +144,7 @@ async function bet(reb_page, bet_page, ID) {
     await bet_page.waitForSelector(
       'button[class*="place-bets-button ui-betslip-action"]'
     );
-    await sleep(1000);
+    await sleep(3000);
 
     // click bet button
     await bet_page.click(
@@ -155,7 +157,7 @@ async function bet(reb_page, bet_page, ID) {
       // set max value
       await bet_page.click('a[class="set-max-stake"]');
 
-      await sleep(1000);
+      await sleep(3000);
       // get max value
       inputElementHandles = await bet_page.$$('input[class="stake"]');
       inputValue = await Promise.all(
@@ -203,7 +205,7 @@ async function bet(reb_page, bet_page, ID) {
     );
 
     // if max value
-    await sleep(1000);
+    await sleep(3000);
     if (
       await bet_page.$('button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]')
     ) {
