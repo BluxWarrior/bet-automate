@@ -1,4 +1,6 @@
 const puppeteer = require("puppeteer");
+const Papa = require("papaparse");
+const fs = require("fs");
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -80,7 +82,19 @@ async function get_betIDs(page) {
   return betIDs;
 }
 
-async function bet(reb_page, bet_page, ID) {
+function convertToCSV(data, outputPath) {
+  // Here you would implement or use a library to write the CSV.
+  // Since papaparse is a popular choice, this example will use it.
+  const jsonContent = JSON.stringify(data, null, 2);
+  fs.writeFileSync("login.json", jsonContent, "utf8");
+  const csv = "\ufeff" + Papa.unparse(data);
+  fs.writeFileSync(outputPath, csv, "utf8");
+  console.log(
+    `The JSON data has been successfully converted to '${outputPath}'.`
+  );
+}
+
+async function bet(reb_page, bet_page, ID, logindata, username) {
   await reb_page.bringToFront();
   await reb_page.click(`div[id=${ID}]`);
 
@@ -102,7 +116,20 @@ async function bet(reb_page, bet_page, ID) {
       return idValue;
     })
   );
-  //   inputValue = ["0.1"];
+
+  // get event name
+  const eventnameHandle = await reb_page.$('div[id="participants"]');
+  const eventname = (await eventnameHandle.evaluate((ele) => ele.textContent))
+    .replaceAll("\n", "")
+    .replaceAll("\t", "");
+  console.log(eventname);
+
+  // get event name
+  const valueHandle = await reb_page.$('div[id="Value"]');
+  const value = await valueHandle.evaluate((ele) => ele.textContent);
+  console.log(value);
+
+  await sleep(1000);
 
   // get card link
   const elementHandles = await reb_page.$$('a[id="BetOnBookmaker"]');
@@ -120,6 +147,13 @@ async function bet(reb_page, bet_page, ID) {
   // go to bet
   console.log(card_link[0]);
   await bet_page.bringToFront();
+  // remove history if exists
+  try {
+    await bet_page.click('a[class="remove-all-bets ui-betslip-action"]');
+  } catch (err) {
+    console.log("remove history");
+  }
+
   await bet_page.goto(card_link[0], { waitUntil: "networkidle0" });
   await sleep(3000);
 
@@ -240,6 +274,7 @@ async function bet(reb_page, bet_page, ID) {
 
   await reb_page.bringToFront();
   await sleep(100);
+
   // log
   console.log("inputvalue     ", inputValue);
   await reb_page.focus('input[id="Stake"]');
@@ -252,7 +287,16 @@ async function bet(reb_page, bet_page, ID) {
   await sleep(1000);
 
   await reb_page.click('button[id="LogBet"]');
+
+  // add login
   await sleep(5000);
+  await logindata.push({
+    Username: username,
+    Event: eventname,
+    Stock: inputValue[0],
+    "%": value,
+  });
+  convertToCSV(logindata, "login.csv");
   return true;
 }
 
@@ -276,6 +320,9 @@ async function remove(reb_page, ID) {
   await bet_login(bet_page, "Chazamunns@googlemail.com", "Charlton1!");
   await sleep(3000);
 
+  let logindata = [];
+  if (fs.existsSync("login.json"))
+    logindata = JSON.parse(fs.readFileSync("login.json", "utf8"));
   await reb_page.bringToFront();
   let origin_betIDs = [];
   while (true) {
@@ -290,7 +337,17 @@ async function remove(reb_page, ID) {
             origin_betIDs.push(bid);
             console.log(origin_betIDs);
             let count = 0;
-            while (!(await bet(reb_page, bet_page, bid)) && count < 10) count++;
+            while (
+              !(await bet(
+                reb_page,
+                bet_page,
+                bid,
+                logindata,
+                "Chazamunns@googlemail.com"
+              )) &&
+              count < 10
+            )
+              count++;
           } else {
             console.log("remove", bid);
             await remove(reb_page, bid);
