@@ -97,6 +97,7 @@ function convertToCSV(data, outputPath) {
 async function bet(reb_page, bet_page, ID, logindata, username) {
   await reb_page.bringToFront();
   await reb_page.click(`div[id=${ID}]`);
+  await sleep(2000);
 
   await reb_page.waitForSelector('a[id="BetOnBookmaker"]');
   //   await reb_page.click('a[id="BetOnBookmaker"]');
@@ -228,12 +229,13 @@ async function bet(reb_page, bet_page, ID, logindata, username) {
     await bet_page.keyboard.up("Control"); // Use 'Command' on macOS
     await bet_page.keyboard.press("Backspace");
     await sleep(1000);
+    console.log("typing", inputValue[0]);
     await bet_page.type('input[aria-label="Stake"]', inputValue[0]);
 
     await bet_page.waitForSelector(
       'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
     );
-    await sleep(500);
+    await sleep(2000);
     await bet_page.click(
       'button[class="typography-h280 _3DCMk _3fSDH _3pIWG"]'
     );
@@ -352,6 +354,8 @@ async function remove(reb_page, ID) {
             console.log("remove", bid);
             await remove(reb_page, bid);
           }
+
+          await sleep(1000);
         }
       }
 
